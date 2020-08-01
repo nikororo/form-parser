@@ -165,14 +165,60 @@ function createDataList(attribute, options) {
 }
 
 function createRefs(refs) {
-    //выводить ссылки
+    let id = 1000;
+
+    refs.map(ref => {
+        if (refs[0].input) {
+            if (ref.input) {
+                let container = document.createElement('div');
+                container.setAttribute('id', 'container__refs');
+                form.appendChild(container);
+
+                let inputField = createInput(ref.input, id);
+                container.appendChild(inputField);
+            } else {
+                createLink(ref, "container__refs");
+            }
+        } else {
+            createLink(ref);
+        }
+    });
+}
+
+function createLink(ref, containerID) {
+    let {text, ref: link} = ref;
+    let textWithoutRef = ref['text without ref'];
+
+    let containerRef = document.createElement('div');
+    containerRef.setAttribute('class', 'container__ref');
+
+    if (containerID) {
+        const container = document.getElementById(containerID);
+        container.appendChild(containerRef);
+    } else {
+        form.appendChild(containerRef);
+    }
+    
+    if (textWithoutRef) {
+        let textField = document.createElement('div');
+        textField.innerHTML = textWithoutRef;
+        containerRef.appendChild(textField);
+    }    
+
+    let linkField = document.createElement('a');
+    linkField.setAttribute('href', link);
+    linkField.innerHTML = text;
+    containerRef.appendChild(linkField);
 }
 
 function createButtons(buttons) {
+    let container = document.createElement('div');
+    form.appendChild(container);
+
     buttons.map(but => {
         let buttonTag = document.createElement('button');
         buttonTag.innerHTML = but.text;
-        form.appendChild(buttonTag);
+        container.appendChild(buttonTag);
     });
 }
 

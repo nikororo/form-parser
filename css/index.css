@@ -15,11 +15,43 @@ label {
     align-items: center;
 }
 
-input, select, textarea, button {
+input, select, textarea {
     margin-bottom: 10px;
     min-width: 200px;
 }
 
+input[type=checkbox] {
+    min-width: 0;
+}
+
+textarea {
+    max-width: 80%;
+}
+
+button {
+    padding: 7px 20px;
+    margin: 0 20px;
+    border-radius: 15px;
+}
+
 select option {
     margin-bottom: 2px;
+}
+
+#container__refs {
+    display: flex;
+    align-items: center;
+}
+
+#container__refs input {
+    margin-right: 10px;
+}
+
+.container__ref {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.container__ref a {
+    margin: 0 10px;
 }
