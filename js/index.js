@@ -4,37 +4,32 @@ const form = document.getElementById("form");
 const inputType = {
     file: "multiple",
     email: "multiple"
-}
+};
 
+let masks = {};
 
 function Parser(jsonFile) {
+    if (!jsonFile) return;
+    
     let reader = new FileReader();
     let json;
 
     reader.readAsText(jsonFile);
     reader.onload = function() {
         json = reader.result;
-        createTitle(JSON.parse(json));
+        createForm(JSON.parse(json));
     };
 }
 
-function createTitle(content) {
-    form.innerHTML = "";
-    let title = document.createElement('h1');
-    let name = content.name;
-
-    name = name[0].toUpperCase() + name.slice(1);
-    name = name.replace(/_/g, " ");
-    
-    title.innerHTML = name;
-    form.appendChild(title);
-
-    createForm(content);
-}
-
 function createForm(content) {
+    form.innerHTML = "";
+    masks = {};
+
     Object.keys(content).map(a => {
         switch (a) {
+            case "name":
+                createTitle(content[a]);
+                break;
             case "fields":
                 createFields(content[a]);
                 break;
@@ -46,6 +41,16 @@ function createForm(content) {
                 break;
         }
     });
+}
+
+function createTitle(name) {
+    let title = document.createElement('h1');
+
+    name = name[0].toUpperCase() + name.slice(1);
+    name = name.replace(/_/g, " ");
+    
+    title.innerHTML = name;
+    form.appendChild(title);
 }
 
 function createFields (fields) {
@@ -68,10 +73,12 @@ function createFields (fields) {
         }
         id++;
     });
+
+    if (Object.keys(masks).length) addMasks();
 }
 
 function createInput(input, id) {
-    if (input.multiple && !(inputType[input.type]==="multiple")) {
+    if (input.multiple && !(inputType[input.type] === "multiple")) {
         delete input.type;
         return createSelect(input, id);
     }  
@@ -94,16 +101,25 @@ function createInput(input, id) {
             createDataList(attribute, input[attribute]);
 
         } else if (attribute === 'mask') {
-            //накладывать маску
+            inputField.setAttribute('type', 'text');
+            inputField.setAttribute('placeholder', input[attribute]);
+            masks[id] = `${input[attribute]}`
             
         } else if (input[attribute] === true) inputField.setAttribute(attribute, '');
-        else inputField.setAttribute(`${attribute}`, input[attribute]);
+        else if (input[attribute] !== 'false') inputField.setAttribute(`${attribute}`, input[attribute]);
     }
     return inputField;
 
 }
 
 function createInputFile(input, id) {
+    
+    let oneField = document.createElement('label');
+    oneField.setAttribute('for', id);
+    oneField.setAttribute('class', 'label__file');
+    oneField.innerHTML = 'Загрузить файл';
+    form.appendChild(oneField);
+
     let inputFileField = document.createElement('input');
     inputFileField.setAttribute('id', id);
 
@@ -115,7 +131,7 @@ function createInputFile(input, id) {
             inputFileField.setAttribute('accept', strAccept.slice(0, -2));
 
         } else if (input[attribute] === true) inputFileField.setAttribute(attribute, '');
-        else inputFileField.setAttribute(`${attribute}`, input[attribute]);
+        else if (input[attribute] !== 'false') inputFileField.setAttribute(`${attribute}`, input[attribute]);
     }
     return inputFileField;
 
@@ -136,7 +152,7 @@ function createSelect(input, id) {
             });
 
         } else if (input[attribute] === true) selectField.setAttribute(attribute, '');
-        else selectField.setAttribute(`${attribute}`, input[attribute]);
+        else if (input[attribute] !== 'false') selectField.setAttribute(`${attribute}`, input[attribute]);
     }
     return selectField;
 }
@@ -147,7 +163,7 @@ function createTextarea(input, id) {
     for (let attribute in input) {
         
         if (input[attribute] === true) textField.setAttribute(attribute, '');
-        else textField.setAttribute(`${attribute}`, input[attribute]);
+        else if (input[attribute] !== 'false') textField.setAttribute(`${attribute}`, input[attribute]);
     }
     return textField;
 }
@@ -162,6 +178,12 @@ function createDataList(attribute, options) {
         option.setAttribute('value', value);
         dataList.appendChild(option);
     });
+}
+
+function addMasks() {
+    for (let id in masks) {
+        $(`#${id}`).mask(`${masks[id]}`);
+    }
 }
 
 function createRefs(refs) {
